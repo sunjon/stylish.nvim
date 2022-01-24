@@ -40,7 +40,7 @@ Plug 'sunjon/stylish.nvim'
 ```lua
 vim.ui.menu = require('stylish').ui_menu()
 -- vim.ui.select = require('stylish').ui_select()
--- vim.ui.notification = require('stylish').ui_notification()
+-- vim.ui.notify = require('stylish').ui_notification()
 ```
 
 ### Testing `vim.ui.menu`
