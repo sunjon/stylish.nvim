@@ -1,6 +1,6 @@
 # stylish.nvim
 
-Stylish UI components for Neovim
+_Stylish UI components for Neovim_
 
 [WIP] This project is in alpha status.
 
@@ -12,6 +12,9 @@ Stylish UI components for Neovim
 
 <img src="https://github.com/sunjon/images/blob/master/stylish_ui_notifications.gif" alt="screenshot" width="800"/>
 
+### vim.ui.clock ?!?
+
+<img src="https://github.com/sunjon/images/blob/master/stylish_ui_notifications.gif" alt="screenshot" width="800"/>
 
 
 ## Installation
