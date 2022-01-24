@@ -1,6 +1,8 @@
 # stylish.nvim
 
-_Stylish UI components for Neovim_
+_A collection of Stylish UI components for Neovim_
+
+Components are rendered using ASCII characters in the terminal. A font that supports glyphs introduced in [Unicode version 13.0](https://unicode.org/versions/Unicode13.0.0/) is required for some effects.
 
 [WIP] This project is in alpha status.
 
