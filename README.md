@@ -4,7 +4,11 @@ Stylish UI components for Neovim
 
 [WIP] This project is in alpha status.
 
+### vim.ui.menu
+
 <img src="https://github.com/sunjon/images/blob/master/stylish_ui_menu.gif" alt="screenshot" width="800"/>
+
+### vim.ui.notification
 
 <img src="https://github.com/sunjon/images/blob/master/stylish_ui_notifications.gif" alt="screenshot" width="800"/>
 
@@ -66,8 +70,9 @@ vim.api.nvim_set_keymap(
 
 ## TODO:
 - [x] vim.ui.menu
-- [ ] vim.ui.select
-- [ ] vim.ui.notification
+- [ ] vim.ui.select # in development
+- [ ] vim.ui.notification # in development
+- [ ] vim.ui.input
 - [ ] mouse controls
 - [ ] animator
 - [ ] documentation
