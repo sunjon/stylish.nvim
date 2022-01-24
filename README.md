@@ -14,7 +14,7 @@ _Stylish UI components for Neovim_
 
 ### vim.ui.clock ?!?
 
-<img src="https://github.com/sunjon/images/blob/master/stylish_ui_notifications.gif" alt="screenshot" width="800"/>
+<img src="https://github.com/sunjon/images/blob/master/stylish_ui_clock.gif" alt="screenshot" width="800"/>
 
 
 ## Installation
