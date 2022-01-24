@@ -10,7 +10,7 @@ This project is alpha/WIP. Feel free to open issues to contribute ideas.
 
 <img src="https://github.com/sunjon/images/blob/master/stylish_ui_menu.gif" alt="screenshot" width="800"/>
 
-### vim.ui.notification
+### vim.ui.notify
 
 <img src="https://github.com/sunjon/images/blob/master/stylish_ui_notifications.gif" alt="screenshot" width="800"/>
 
@@ -76,7 +76,7 @@ vim.api.nvim_set_keymap(
 ## TODO:
 - [x] vim.ui.menu
 - [ ] vim.ui.select # in development
-- [ ] vim.ui.notification # in development
+- [ ] vim.ui.notify # in development
 - [ ] vim.ui.input
 - [ ] mouse controls
 - [ ] animator
