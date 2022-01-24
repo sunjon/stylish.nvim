@@ -6,6 +6,10 @@ Stylish UI components for Neovim
 
 <img src="https://github.com/sunjon/images/blob/master/stylish_ui_menu.gif" alt="screenshot" width="800"/>
 
+<img src="https://github.com/sunjon/images/blob/master/stylish_ui_notifications.gif" alt="screenshot" width="800"/>
+
+
+
 ## Installation
 
 ### [Packer](https://github.com/wbthomason/packer.nvim) 
