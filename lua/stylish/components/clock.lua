@@ -314,7 +314,7 @@ function M.setup(self, user_config)
     ANIMATION_BRIGHTNESS_STEPS
   ).fg[1]
 
-  print(vim.inspect(clock_hl_groups))
+  -- print(vim.inspect(clock_hl_groups))
 
   vim.cmd('hi! WidgetClockMask       guibg=background blend=' .. MASK_BLEND_LEVEL) -- NOTE: Masking blocks doesn't work at the same time as blur bg
   vim.cmd 'hi! WidgetClockBackground guibg=background blend=0'
