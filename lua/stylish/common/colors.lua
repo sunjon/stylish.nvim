@@ -1,52 +1,69 @@
 local Colors = {}
 
-local function create_hl_groups()
-  vim.cmd [[
-hi! CursorOff             blend=100
-hi! PopupNormal           guifg=#323134 guibg=#222124
-hi! PopupTitle            guifg=#ac9e8a
-hi! PopupTitleSubmenu     guifg=#8ec07c
-hi! MenuBackIndicator     guifg=#68645e
-hi! ItemIndicatorInactive guifg=#222124 guibg=#323134
-hi! ItemIndicatorActive   guifg=#8ec07c guibg=#323134
-hi! ItemIndicatorSelected guifg=#E0B828 guibg=#323134
-" hi! ItemIndicatorSelected guifg=#CD9A13 guibg=#323134
-" hi! ItemIndicatorSelected guifg=#E9772a guibg=#323134
-hi! ItemIndicatorNotSelected guifg=#222124 guibg=#323134
-" hi! ItemTextActive        guifg=#ebdbb2 guibg=#323134
-hi! ItemTextActive        guifg=#8ec07c guibg=#323134
-hi! ItemTextActive        guifg=#eddeb8 guibg=#323134
-hi! ItemTextInactive      guifg=#68645e guibg=#323134
-hi! ItemTextSelected      guifg=#E0B828 guibg=#323134
+local palette = {
+  green_light = '#8ec07c',
+  orange_light = '#e0b828',
+  background = '#1a1a1a',
+  grey_1 = '#222124',
+  grey_2 = '#323134',
+  grey_3 = '#68645e',
+  grey_4 = '#ac9e8a',
+  grey_5 = '#eddeb8',
+  grey_6 = '#bdae92',
+}
 
-hi! ScrollIndicatorActive guifg=#ac9e8a
+-- local function hextobin(hex)
+--   hex = hex:gsub('^#', '')
+--   return tonumber(hex, 16)
+-- end
+-- -- convert hex vals to bin
+-- for i, color in pairs(palette) do
+--   palette[i] = hextobin(color)
+-- end
+-- print(vim.inspect(palette))
 
-" ToolbarLine and ToolbarButton
-hi! link ToolbarLine PopupNormal
-hi! ButtonEdge guibg=#323134
-hi! ButtonText guifg=#68645e guibg=#323134
-
-hi! ButtonSelectedEdge guibg=#323134
-hi! ButtonSelectedText guifg=#eddeb8 guibg=#323134
-
-hi! SubmenuIndicator guibg=#323134 guifg=#222124
-" hi! SubmenuIndicatorActive guibg=#323134 guifg=#6A7D7F
-" hi! SubmenuIndicatorActive guibg=#323134 guifg=#6D6A5a
-" hi! SubmenuIndicatorActive guibg=#323134 guifg=#486852
-hi! SubmenuIndicatorActive guibg=#323134 guifg=#ac9e8a
-
-hi! ToggleButton guifg=#bdae92 guibg=#323134
-hi! ToggleButtonInner guifg=#bdae92 guibg=#1a1a1a
-hi! ToggleButtonEdge guibg=#323134 guifg=#1a1a1a
-hi! ToggleButtonSelector guifg=#ebdbb2 guibg=#222124
-
-" hi! ItemIndicatorLoaded   guifg=#496544 guibg=#323134
-]]
-end
--- " hi! ItemIndicatorLoaded   guifg=#efb009 guibg=#323134
+local hl_groups = {}
+hl_groups.menu = {
+  PopupNormal = { fg = palette.grey_2, bg = palette.grey_1 },
+  PopupTitle = { fg = palette.grey_4 },
+  PopupTitleSubmenu = { fg = palette.green_light },
+  MenuBackIndicator = { fg = palette.grey_3 },
+  ItemIndicatorInactive = { fg = palette.grey_1, bg = palette.grey_2 },
+  ItemIndicatorActive = { fg = palette.green_light, bg = palette.grey_3 },
+  ItemIndicatorSelected = { fg = palette.orange_light, bg = palette.grey_2 },
+  ItemIndicatorNotSelected = { fg = palette.grey_1, bg = palette.grey_2 },
+  -- ItemTextActive = { fg = palette.green_light, bg = palette.grey_2 },
+  ItemTextActive = { fg = palette.grey_5, bg = palette.grey_2 },
+  ItemTextInactive = { fg = palette.grey_3, bg = palette.grey_2 },
+  ItemTextSelected = { fg = palette.orange_light, bg = palette.grey_2 },
+  ScrollIndicatorActive = { fg = palette.grey_4 },
+  SubmenuIndicator = { fg = palette.grey_1, bg = palette.grey_2 },
+  SubmenuIndicatorActive = { fg = palette.grey_4, bg = palette.grey_2 },
+  ToggleButton = { fg = palette.grey_6, bg = palette.grey_2 },
+  ToggleButtonInner = { fg = palette.grey_6, bg = palette.background },
+  ToggleButtonEdge = { fg = palette.background, bg = palette.grey_2 },
+  ToggleButtonSelector = { fg = palette.grey_5, bg = palette.grey_1 },
+}
 
 function Colors.setup()
-  create_hl_groups()
+  local nvim_set_hl = vim.api.nvim_set_hl
+  Colors.nsid = vim.api.nvim_create_namespace 'fooey'
+
+  -- create_hl_groups()
+
+  -- for group, attrs in pairs(hl_groups.menu) do
+  --   local cmd = ('nvim_set_hl(%d, "%s", %s)'):format(Colors.nsid, group, type(attrs))
+  --   nvim_set_hl(Colors.nsid, group, attrs)
+  --   print(cmd)
+  --   print(vim.inspect(attrs))
+  -- end
+  local cmd, fg, bg
+  for group, attrs in pairs(hl_groups.menu) do
+    fg = attrs.fg and ('guifg=%s'):format(attrs.fg) or ''
+    bg = attrs.bg and ('guibg=%s'):format(attrs.bg) or ''
+    cmd = ('hi! %s %s %s'):format(group, fg, bg)
+    vim.cmd(cmd)
+  end
 end
 
 return Colors
