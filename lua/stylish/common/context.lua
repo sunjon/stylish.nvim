@@ -5,7 +5,7 @@ local registry_size = 0
 local internal_register = {}
 
 function ContextManager.add(obj)
-  internal_register[obj.window.id] = obj
+  internal_register[obj.window.winid] = obj
   registry_size = registry_size + 1
 end
 

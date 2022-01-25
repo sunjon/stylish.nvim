@@ -35,7 +35,7 @@ local function init_viewport(menu_items, max_visible_items)
     items_above = 0,
     items_below = total_items - total_visible_items,
     selected_idx = 1,
-    top_visible_idx = 1
+    top_visible_idx = 1,
   }
 end
 
@@ -66,7 +66,7 @@ function Menu:new(menu_data, opts, on_choice)
 
   --
   this.window = Window:create(1, 1, opts.pos.x, opts.pos.y)
-  this.nsid = vim.api.nvim_create_namespace(('stylish_menu_%d'):format(this.window.id))
+  this.nsid = vim.api.nvim_create_namespace(('stylish_menu_%d'):format(this.window.winid))
   this.active_style = Styles.default
   this.on_choice = on_choice
 
@@ -80,7 +80,7 @@ function Menu:new(menu_data, opts, on_choice)
   this:update()
 
   -- TODO: Config table needs to be avail here
-  KeyMap.set_keymaps(this.window.id, this.window.bufnr)
+  KeyMap.set_keymaps(this.window.winid, this.window.bufnr)
 
   -- store the popup details in the registry
   ContextManager.add(this)
@@ -243,7 +243,6 @@ function Menu:_resize_window()
   local active_menu = self.stack[#self.stack]
   self.viewport = init_viewport(active_menu.items, self.config.max_visible_items)
 
-
   -- TODO: use config and style data for title_height, padding and border
   local title_height = 2
   local padding = 1
@@ -268,7 +267,7 @@ function Menu:_resize_window()
   -- TODO: prefer odd numbers for winsize.width, so that overflow indicator is correctly centered
   self.window.width = win_width
   self.window.height = win_height
-  api.nvim_win_set_config(self.window.id, { width = self.window.width, height = self.window.height })
+  api.nvim_win_set_config(self.window.winid, { width = self.window.width, height = self.window.height })
   -- print( self.window.width .. ' x ' .. self.window.height )
 end
 
@@ -294,7 +293,7 @@ function Menu:close(event)
   nvim_buf_clear_namespace(self.window.bufnr, self.nsid, 0, -1)
   nvim_buf_delete(self.window.bufnr, { force = true })
 
-  ContextManager.remove(self.window.id)
+  ContextManager.remove(self.window.winid)
   vim.api.nvim_command 'hi! Cursor blend=0'
 end
 
@@ -354,7 +353,7 @@ end
 --   if not active.is_loaded and (direction == 1 or (direction == -1 and active.is_selected == true)) then
 --     context.displayed_items[context.active_list_idx].is_selected = not active.is_selected
 --   end
---   Menu.actions:change_selection(context.window.id, direction)
+--   Menu.actions:change_selection(context.window.winid, direction)
 -- end
 
 function Menu.actions:accept_selection()
@@ -368,7 +367,7 @@ function Menu.actions:accept_selection()
     self.stack[#self.stack + 1] = {
       title = selected_item.name,
       items = submenu_items,
-      viewport = init_viewport(submenu_items, self.config.max_visible_items)
+      viewport = init_viewport(submenu_items, self.config.max_visible_items),
     }
     self:update()
   else

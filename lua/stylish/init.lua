@@ -1,10 +1,22 @@
 local Config = require 'stylish.common.config'
 local ContextManager = require 'stylish.common.context'
+
+-- TODO: only require components configured by user
 local Menu = require 'stylish.components.menu'
-require('stylish.common.colors').setup()
+local Clock = require 'stylish.components.clock'
+-- print(vim.inspect(Clock))
+
 
 --
 vim.cmd 'au! CmdlineLeave : lua require"stylish".event_listener(vim.Nil, "CmdlineLeave")'
+
+require('stylish.common.colors').setup()
+-- vim.cmd 'au! ColorScheme * lua require"stylish.common.colors".setup()'
+
+-- local plugin_dir = vim.fn.expand('<sfile>:p:h:h') .."/data/" -- todo: better way to resolve plugin path?
+-- vim.g.stylish_plugin_dir = plugin_dir
+-- print("!!!! " ..  vim.g.stylish_plugin_dir)
+-- vim.api.nvim_set_var('stylish_plugin_dir', vim.fn.expand('<sfile>:p:h:h') .."/data/")
 
 -- local function ui_menu(list, opts, cb)
 --   return select
@@ -52,6 +64,11 @@ end
 
 function Stylish:ui_select(...)
   require('stylish.components').select(...)
+end
+
+function Stylish:ui_clock()
+  -- local new_clock = Clock:toggle()
+  Clock:toggle()
 end
 --
 
