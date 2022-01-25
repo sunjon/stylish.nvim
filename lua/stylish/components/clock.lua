@@ -127,7 +127,7 @@ local function box_blur(grid_lines, animation_timer)
 
   local surrounding_cells = { { -1, 0 }, { -1, 1 }, { 0, 1 }, { 1, 1 }, { 1, 0 }, { 1, -1 }, { -1, -1 } }
   local elapsed_proportion = animation_timer and (animation_timer.elapsed / ANIMATION_FADE_IN_TIME) or 1
-  print(elapsed_proportion)
+  -- print(elapsed_proportion)
 
   local blur_value, blur_average, blur_color_idx
   local blur_lines = {}
