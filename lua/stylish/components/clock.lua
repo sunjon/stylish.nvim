@@ -13,7 +13,7 @@ local ANIMATION_FADE_IN_TIME = 0.16
 local ANIMATION_BRIGHTNESS_STEPS = 8 -- defines the number of gradient Colors created
 
 local FADE_ENABLED = true
-local SHOW_BACKGROUND = false
+local SHOW_BACKGROUND = true
 
 local BORDER_CHARS = Styles.border_chars
 local DEFAULT_TEXT_COLOR = 'yellow'
