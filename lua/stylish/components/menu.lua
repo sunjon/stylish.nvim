@@ -4,6 +4,7 @@ local ContextManager = require 'stylish.common.context'
 local KeyMap = require 'stylish.common.keymap'
 local Styles = require 'stylish.common.styles'
 local Window = require 'stylish.common.window'
+local Util = require 'stylish.common.util'
 
 --
 
@@ -52,7 +53,8 @@ function Menu:new(menu_data, opts, on_choice)
 
 
   -- TODO: decide on window management strategy
-  if ContextManager.get(vim.api.nvim_get_current_win()) then
+  local current_winid = vim.api.nvim_get_current_win()
+  if ContextManager.get(current_winid) then
     return
   end
   -- print(vim.inspect(opts))
@@ -63,7 +65,6 @@ function Menu:new(menu_data, opts, on_choice)
   vim.cmd [[hi Cursor blend=100]]
 
   opts = opts or {}
-  opts.pos = opts.pos or { x = 1, y = 1 }
   this.default_prompt = opts.prompt
   this.title = opts.prompt
 
@@ -71,8 +72,16 @@ function Menu:new(menu_data, opts, on_choice)
   -- TODO: validate menu_data
   this._menu_data = menu_data
 
-  --
-  this.window = Window:create(1, 1, opts.pos.x, opts.pos.y)
+  local position_opts
+  if not opts.pos then
+    position_opts = {
+      relative = 'cursor',
+      bufpos = {0, 0}
+    }
+    opts.pos = {}
+  end
+
+  this.window = Window:create(1, 1, opts.pos, position_opts)
   this.nsid = vim.api.nvim_create_namespace(('stylish_menu_%d'):format(this.window.winid))
   this.active_style = Styles.default
   this.on_choice = on_choice
