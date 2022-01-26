@@ -50,6 +50,13 @@ function Menu:new(menu_data, opts, on_choice)
   setmetatable(this, self)
   self.__index = self
 
+
+  -- TODO: decide on window management strategy
+  if ContextManager.get(vim.api.nvim_get_current_win()) then
+    return
+  end
+  -- print(vim.inspect(opts))
+
   -- TODO: make ContextManager return menu_opts, or select_opts, or <widget>_opts
   this.config = ContextManager.config.opts
   -- TODO: move cursor to aucmd
