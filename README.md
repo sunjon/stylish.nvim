@@ -73,6 +73,8 @@ vim.api.nvim_set_keymap(
 )
 ```
 
+### Testing `stylish.ui_clock`
+
 #### Configuration: Clock
 
 ```lua
