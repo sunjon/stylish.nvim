@@ -6,7 +6,7 @@ end
 local Window = {}
 Window.__index = Window
 
-function Window:create(width, height, pos, opts, focus_window)
+function Window:new(width, height, pos, opts, focus_window)
   local this = {}
   setmetatable(this, self)
   self.__index = self

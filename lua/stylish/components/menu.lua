@@ -4,7 +4,7 @@ local ContextManager = require 'stylish.common.context'
 local KeyMap = require 'stylish.common.keymap'
 local Styles = require 'stylish.common.styles'
 local Window = require 'stylish.common.window'
-local Util = require 'stylish.common.util'
+-- local Util = require 'stylish.common.util'
 
 --
 
@@ -81,7 +81,7 @@ function Menu:new(menu_data, opts, on_choice)
     opts.pos = {}
   end
 
-  this.window = Window:create(1, 1, opts.pos, position_opts)
+  this.window = Window:new(1, 1, opts.pos, position_opts)
   this.nsid = vim.api.nvim_create_namespace(('stylish_menu_%d'):format(this.window.winid))
   this.active_style = Styles.default
   this.on_choice = on_choice
