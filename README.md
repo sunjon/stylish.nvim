@@ -62,7 +62,7 @@ end
 
 See `:h menu` for more details
 
-#### Activation
+#### Configuration: Menu
 
 ```lua
 vim.api.nvim_set_keymap(
@@ -73,8 +73,21 @@ vim.api.nvim_set_keymap(
 )
 ```
 
+#### Configuration: Clock
+
+```lua
+
+vim.api.nvim_set_keymap(
+  'n',
+  '<F12>',
+  '<Cmd>lua require"stylish".ui_clock()<CR>',
+  { noremap = true, silent = true }
+)
+```
+
 ## TODO:
 - [x] vim.ui.menu
+- [x] vim.ui.clock (fading not working, no background)
 - [ ] vim.ui.select # in development
 - [ ] vim.ui.notify # in development
 - [ ] vim.ui.input
