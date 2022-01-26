@@ -19,7 +19,7 @@ function Window:new(width, height, pos, opts, focus_window)
 
   local padding = 2
   local default_opts = {}
-  default_opts.relative = 'cursor'
+  default_opts.relative = 'editor'
   default_opts.style = 'minimal'
   default_opts.focusable = false
   default_opts.border = 'shadow'
