@@ -197,7 +197,15 @@ Styles.default.apply = function(width, total_items, max_display_items)
   return content_lines
 end
 
-function Styles.foo()
-end
+Styles.border_chars = {
+  { '🭽', 'WidgetClockBorder' },
+  { '▔', 'WidgetClockBorder' },
+  { '🭾', 'WidgetClockBorder' },
+  { '▕', 'WidgetClockBorder' },
+  { '🭿', 'WidgetClockBorder' },
+  { '▁', 'WidgetClockBorder' },
+  { '🭼', 'WidgetClockBorder' },
+  { '▏', 'WidgetClockBorder' },
+}
 
 return Styles
