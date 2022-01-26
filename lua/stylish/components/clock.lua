@@ -7,12 +7,13 @@ local Timer = require 'stylish.common.timer'
 
 local api = vim.api
 
+-- TODO: find a home for all these vars
 local UPDATE_INTERVAL = 1000 / 60 -- animation frame rate
 local ANIMATION_FADE_IN_TIME = 0.16
 local ANIMATION_BRIGHTNESS_STEPS = 8 -- defines the number of gradient Colors created
 
 local FADE_ENABLED = true
-local SHOW_BACKGROUND = true
+local SHOW_BACKGROUND = false
 
 local BORDER_CHARS = Styles.border_chars
 local DEFAULT_TEXT_COLOR = 'yellow'
@@ -32,6 +33,7 @@ local MASK_BLEND_LEVEL = 20
 local FLOATWIN_WIDTH = 76
 local FLOATWIN_HEIGHT = 7
 
+-- TODO: move char_map to styles
 local char_map = {
   [0] = ' ',
   [1] = '',
@@ -237,14 +239,17 @@ local function update_time_display(state)
     end
   end
 
-  -- apply blur highlighting to floatwin
-  local blur_lines = box_blur(clock_lines, state.animation_timer)
-  local blur_val, hl_group
-  for row = 1, #blur_lines do
-    for col = 1, FLOATWIN_WIDTH do
-      blur_val = blur_lines[row][col]
-      hl_group = blur_val and TEXT_COLOR_PREFIX .. blur_val or ''
-      buf_add_hl(state.display.bufnr, state.nsid, hl_group, row, col - 1, col)
+  if SHOW_BACKGROUND then
+    -- apply blur highlighting to floatwin background
+    local blur_lines = box_blur(clock_lines, state.animation_timer)
+    -- local blur_lines = clock_lines
+    local blur_val, hl_group
+    for row = 1, #blur_lines do
+      for col = 1, FLOATWIN_WIDTH do
+        blur_val = blur_lines[row][col]
+        hl_group = blur_val and TEXT_COLOR_PREFIX .. blur_val or ''
+        buf_add_hl(state.display.bufnr, state.nsid, hl_group, row, col - 1, col)
+      end
     end
   end
 
@@ -253,7 +258,7 @@ local function update_time_display(state)
   for row, row_values in ipairs(clock_lines) do
     row_chunks = textrow_to_chunks(row_values, FLOATWIN_WIDTH, function(val)
       return (val == 0)
-          and ((SHOW_BACKGROUND and ((row == 1) or (row == FLOATWIN_HEIGHT))) and 'WidgetClockMask' or state.hl_groups[brightness])
+          and (((SHOW_BACKGROUND and ((row == 1) or (row == FLOATWIN_HEIGHT))) or (not SHOW_BACKGROUND)) and 'WidgetClockMask' or state.hl_groups[brightness])
         or state.hl_groups[brightness]
     end)
 
@@ -274,7 +279,7 @@ local function init_window(nsid)
   -- TODO: allow for preset clock positions
   local parent_win_width = vim.o.columns
   local clock_pos = { row = 2, col = parent_win_width - FLOATWIN_WIDTH - 2 }
-  local floatwin = Window:create(FLOATWIN_WIDTH, FLOATWIN_HEIGHT, clock_pos, { border = BORDER_CHARS }, false)
+  local floatwin = Window:new(FLOATWIN_WIDTH, FLOATWIN_HEIGHT, clock_pos, { border = BORDER_CHARS }, false)
 
   -- fill the buffer with characters for extmarks to overlay
   api.nvim_buf_set_lines(floatwin.bufnr, 0, FLOATWIN_HEIGHT - 1, false, FILLER_LINES)
