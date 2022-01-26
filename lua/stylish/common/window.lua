@@ -6,7 +6,7 @@ end
 local Window = {}
 Window.__index = Window
 
-function Window:create(width, height, col, row, opts, focus_window)
+function Window:create(width, height, pos, opts, focus_window)
   local this = {}
   setmetatable(this, self)
   self.__index = self
@@ -19,16 +19,18 @@ function Window:create(width, height, col, row, opts, focus_window)
 
   local padding = 2
   local default_opts = {}
-  default_opts.relative = 'editor'
+  default_opts.relative = 'cursor'
   default_opts.style = 'minimal'
   default_opts.focusable = false
   default_opts.border = 'shadow'
-  default_opts.row = row
-  default_opts.col = col
+  default_opts.row = pos.row
+  default_opts.col = pos.col
   default_opts.width = width
   default_opts.height = height
 
   opts = vim.tbl_extend('force', default_opts, opts)
+
+  -- print(vim.inspect(opts))
 
   -- create the window
   local bufnr = nvim_create_buf(false, true)
