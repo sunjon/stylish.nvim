@@ -2,6 +2,7 @@ local Colors = require 'stylish.common.colors'
 local Data = require 'stylish.common.data_rle'
 local Window = require 'stylish.common.window'
 local Utils = require 'stylish.common.util'
+local Styles = require 'stylish.common.styles'
 local Timer = require 'stylish.common.timer'
 
 local api = vim.api
@@ -13,6 +14,7 @@ local ANIMATION_BRIGHTNESS_STEPS = 8 -- defines the number of gradient Colors cr
 local FADE_ENABLED = true
 local SHOW_BACKGROUND = true
 
+local BORDER_CHARS = Styles.border_chars
 local DEFAULT_TEXT_COLOR = 'yellow'
 -- local DEFAULT_TEXT_COLOR = "green"
 
@@ -185,6 +187,8 @@ local function update_time_display(state)
     return
   end
 
+  -- UPDATE DISPLAY
+
   state.last_displayed_time = time_str
   local time_tbl = explode(time_str)
 
@@ -204,10 +208,19 @@ local function update_time_display(state)
   else
     brightness = ANIMATION_BRIGHTNESS_STEPS
   end
+  -- print('brightness:' .. brightness)
 
+  --
+  if not state.animation_timer then
+    buf_clear_namespace(state.display.bufnr, state.nsid, 0, -1)
+    -- print('clear: ' .. os.clock())
+  end
+
+  -- print(vim.inspect(clock_lines))
+
+  local font_data = state.font_data
   -- insert line indents in numerical form
   local clock_lines = create_line_indents()
-  local font_data = state.font_data
 
   -- join font character tables
   local font_size, font_idx, str_idx
@@ -222,12 +235,6 @@ local function update_time_display(state)
       font_idx = time_tbl[str_idx] == 0 and 10 or time_tbl[str_idx]
       join_table_lines(clock_lines, font_data[font_size][font_idx])
     end
-  end
-
-  --
-  if not state.animation_timer then
-    buf_clear_namespace(state.display.bufnr, state.nsid, 0, -1)
-    -- print("clear: " .. os.clock())
   end
 
   -- apply blur highlighting to floatwin
@@ -261,20 +268,13 @@ local function update_time_display(state)
 end
 
 --
-local BORDER_CHARS = {
-  { '🭽', 'WidgetClockBorder' },
-  { '▔', 'WidgetClockBorder' },
-  { '🭾', 'WidgetClockBorder' },
-  { '▕', 'WidgetClockBorder' },
-  { '🭿', 'WidgetClockBorder' },
-  { '▁', 'WidgetClockBorder' },
-  { '🭼', 'WidgetClockBorder' },
-  { '▏', 'WidgetClockBorder' },
-}
 
 local function init_window(nsid)
   -- create the floating window
-  local floatwin = Window:create(FLOATWIN_WIDTH, FLOATWIN_HEIGHT, 2, 2, {border=BORDER_CHARS}, false)
+  -- TODO: allow for preset clock positions
+  local parent_win_width = vim.o.columns
+  local clock_pos = { row = 2, col = parent_win_width - FLOATWIN_WIDTH - 2 }
+  local floatwin = Window:create(FLOATWIN_WIDTH, FLOATWIN_HEIGHT, clock_pos, { border = BORDER_CHARS }, false)
 
   -- fill the buffer with characters for extmarks to overlay
   api.nvim_buf_set_lines(floatwin.bufnr, 0, FLOATWIN_HEIGHT - 1, false, FILLER_LINES)
@@ -314,8 +314,6 @@ function M.setup(self, user_config)
     ANIMATION_BRIGHTNESS_STEPS
   ).fg[1]
 
-  -- print(vim.inspect(clock_hl_groups))
-
   vim.cmd('hi! WidgetClockMask       guibg=background blend=' .. MASK_BLEND_LEVEL) -- NOTE: Masking blocks doesn't work at the same time as blur bg
   vim.cmd 'hi! WidgetClockBackground guibg=background blend=0'
   vim.cmd 'hi! WidgetClockBorder guifg=#544E4A guibg=background'
@@ -339,7 +337,6 @@ function M.toggle(self)
       last_frame = Timer.get_time(),
     }
 
-    -- print(vim.inspect(self.state))
     self.state.timer = vim.loop.new_timer()
     -- TODO: need separate timer_interval for update_display and animations
     self.state.timer:start(0, UPDATE_INTERVAL, function()
