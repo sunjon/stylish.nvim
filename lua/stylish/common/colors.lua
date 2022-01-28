@@ -71,9 +71,32 @@ local function lerp_color_gradient(color_1, color_2, interp)
   return ("#%02x%02x%02x"):format(r, g, b)
 end
 
+
+local function rgb_to_hex(color)
+  local i = color.r
+  i = bit.lshift(i, 8) + color.g
+  i = bit.lshift(i, 8) + color.b
+  return ("#%06x"):format(i)
+end
+
+-- TODO: why two gradient methods...
+Colors.create_gradient = function(hl_start, hl_end, steps)
+  local lerp = utils.lerp
+  local gradient = {}
+  for i=0, steps-1 do
+    local step_color = {}
+    local offset = (1/(steps-1)) * i
+    for _, c in pairs({'r', 'g' , 'b'}) do
+      step_color[c] = lerp(hl_start[c], hl_end[c], offset)
+    end
+    gradient[i+1] = rgb_to_hex(step_color)
+  end
+
+  return gradient
+end
 --
 function Colors.setup()
-  local nvim_set_hl = vim.api.nvim_set_hl
+  -- local nvim_set_hl = vim.api.nvim_set_hl
   Colors.nsid = vim.api.nvim_create_namespace 'fooey'
 
   -- create_hl_groups()
@@ -91,6 +114,10 @@ function Colors.setup()
     cmd = ('hi! %s %s %s'):format(group, fg, bg)
     vim.cmd(cmd)
   end
+end
+
+local function hexstring_to_int(hexstr)
+  return (tonumber(hexstr, 16) + 2^31) % 2^32 - 2^31
 end
 
 function Colors.create_gradient_map(prefix, color_name, palette, max_brightness)

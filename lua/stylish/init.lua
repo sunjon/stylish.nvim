@@ -4,6 +4,7 @@ local ContextManager = require 'stylish.common.context'
 -- TODO: only require components configured by user
 local Menu = require 'stylish.components.menu'
 local Clock = require 'stylish.components.clock'
+local Nyan = require 'stylish.components.nyan'
 -- print(vim.inspect(Clock))
 
 
@@ -66,9 +67,23 @@ function Stylish:ui_select(...)
   require('stylish.components').select(...)
 end
 
+
+local my_clock
 function Stylish:ui_clock()
   -- local new_clock = Clock:toggle()
-  Clock:toggle()
+  -- print("New clock!")
+  if my_clock then
+    my_clock:stop()
+    my_clock = nil
+  else
+    my_clock = Clock:new()
+    my_clock:start()
+  end
+  -- print(vim.inspect(Clock))
+end
+
+function Stylish:ui_nyan()
+  Nyan:new()
 end
 --
 
@@ -88,6 +103,13 @@ function Stylish.event_listener(winid, event)
   local get_current_win = vim.api.nvim_get_current_win
   if not winid == get_current_win() then
     return
+  end
+
+  -- print("OMG: " .. os.clock())
+  -- print(vim.inspect(event))
+  if event and event == 'KeyPress' then
+    local key = vim.api.nvim_get_vvar('char')
+    print("!!!!!!! " .. key)
   end
   -- print("EVENT: " .. event)
   if event and event == 'FocusLost' then

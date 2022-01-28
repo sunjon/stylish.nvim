@@ -3,7 +3,7 @@ local api = vim.api
 local ContextManager = require 'stylish.common.context'
 local KeyMap = require 'stylish.common.keymap'
 local Styles = require 'stylish.common.styles'
-local Window = require 'stylish.common.window'
+local Canvas = require 'stylish.common.canvas'
 -- local Util = require 'stylish.common.util'
 
 --
@@ -51,7 +51,6 @@ function Menu:new(menu_data, opts, on_choice)
   setmetatable(this, self)
   self.__index = self
 
-
   -- TODO: decide on window management strategy
   local current_winid = vim.api.nvim_get_current_win()
   if ContextManager.get(current_winid) then
@@ -72,17 +71,21 @@ function Menu:new(menu_data, opts, on_choice)
   -- TODO: validate menu_data
   this._menu_data = menu_data
 
-  local position_opts
-  if not opts.pos then
-    position_opts = {
-      relative = 'cursor',
-      bufpos = {0, 0}
-    }
-    opts.pos = {}
-  end
+  local canvas_config = {
+    win_opts = {
+      height = 1,
+      width = 1,
+      row = 1,
+      col = 1,
+      relative = not opts.pos and 'cursor',
+      bufpos = not opts.pos and {0, 0},
+    } ,
+    focus_window = true,
+    win_settings ={ { 'winhighlight', 'Normal:PopupNormal' } },
+  }
 
-  this.window = Window:new(1, 1, opts.pos, position_opts)
-  this.nsid = vim.api.nvim_create_namespace(('stylish_menu_%d'):format(this.window.winid))
+  this.canvas = Canvas:new(canvas_config)
+  this.nsid = vim.api.nvim_create_namespace(('stylish_menu_%d'):format(this.canvas.winid))
   this.active_style = Styles.default
   this.on_choice = on_choice
 
@@ -96,7 +99,7 @@ function Menu:new(menu_data, opts, on_choice)
   this:update()
 
   -- TODO: Config table needs to be avail here
-  KeyMap.set_keymaps(this.window.winid, this.window.bufnr)
+  KeyMap.set_keymaps(this.canvas.winid, this.canvas.bufnr)
 
   -- store the popup details in the registry
   ContextManager.add(this)
@@ -116,8 +119,8 @@ function Menu:set_styled_labels()
   local function set_extmark(row, col, chunks, mark_id)
     local nvim_buf_set_extmark = vim.api.nvim_buf_set_extmark
     mark_id = nvim_buf_set_extmark(
-      self.window.bufnr,
-      self.nsid,
+      self.canvas.bufnr,
+      self.canvas.nsid,
       row,
       0,
       { id = mark_id, virt_text = chunks, virt_text_pos = 'overlay', virt_text_win_col = col }
@@ -144,9 +147,9 @@ function Menu:set_styled_labels()
   local overflow_bot = viewport.items_below > 0
   if overflow_top or overflow_bot then
     -- item count
-    local count_msg = ('%d/%s'):format(viewport.selected_idx, total_items)
+    local count_msg = ('%d/%d'):format(viewport.selected_idx, total_items)
     local chunks = { { count_msg, 'ScrollIndicatorActive' } }
-    local col = self.window.width - vim.api.nvim_strwidth(count_msg) - 1
+    local col = self.canvas.width - vim.api.nvim_strwidth(count_msg) - 1
     set_extmark(2, col, chunks)
 
     --
@@ -160,7 +163,7 @@ function Menu:set_styled_labels()
     -- local padding = 1
 
     local marker_len = vim.api.nvim_strwidth(marker_char_top)
-    col = math.floor(self.window.width / 2) - marker_len
+    col = math.floor(self.canvas.width / 2) - marker_len
 
     chunks = { { marker_char_top, scroll_indicator_hl_top } }
     set_extmark(2, col, chunks)
@@ -217,7 +220,7 @@ function Menu:set_styled_labels()
       submenu_indicator_icon = self.active_style.symbols.HAS_SUBMENU
 
       -- extmark_ids.submenu_indicator = nvim_buf_set_extmark(bufnr, nsid, row, 0, {
-      local col = self.window.width - 3
+      local col = self.canvas.width - 3
       chunks = { { submenu_indicator_icon, submenu_indicator_hl } }
       set_extmark(row, col, chunks)
     end
@@ -234,20 +237,20 @@ end
 function Menu:set_styled_base() -- TODO: rename this, it sents content based on items/size; it doesn't style anything
   local nvim_buf_set_lines = vim.api.nvim_buf_set_lines
   local active_menu = self.stack[#self.stack]
-  local content_lines = self.active_style.apply(self.window.width, #active_menu.items, self.viewport.items_visible)
-  nvim_buf_set_lines(self.window.bufnr, 0, -1, false, content_lines)
+  local content_lines = self.active_style.apply(self.canvas.width, #active_menu.items, self.viewport.items_visible)
+  nvim_buf_set_lines(self.canvas.bufnr, 0, -1, false, content_lines)
 end
 
 --
 function Menu:clear_styled_labels()
   local nvim_buf_clear_namespace = vim.api.nvim_buf_clear_namespace
-  nvim_buf_clear_namespace(self.window.bufnr, self.nsid, 0, -1)
+  nvim_buf_clear_namespace(self.canvas.bufnr, self.canvas.nsid, 0, -1)
 end
 
 --
 function Menu:clear_styled_base()
   local nvim_buf_set_lines = vim.api.nvim_buf_set_lines
-  nvim_buf_set_lines(self.window.bufnr, 0, -1, false, {})
+  nvim_buf_set_lines(self.canvas.bufnr, 0, -1, false, {})
 end
 
 --
@@ -281,10 +284,10 @@ function Menu:_resize_window()
   local win_height = (self.viewport.items_visible * 2) + title_height + padding + border + scroll_marker_height
 
   -- TODO: prefer odd numbers for winsize.width, so that overflow indicator is correctly centered
-  self.window.width = win_width
-  self.window.height = win_height
-  api.nvim_win_set_config(self.window.winid, { width = self.window.width, height = self.window.height })
-  -- print( self.window.width .. ' x ' .. self.window.height )
+  self.canvas.width = win_width
+  self.canvas.height = win_height
+  api.nvim_win_set_config(self.canvas.winid, { width = self.canvas.width, height = self.canvas.height })
+  -- print( self.canvas.width .. ' x ' .. self.canvas.height )
 end
 
 -- Update 'mono-menu'
@@ -306,10 +309,10 @@ function Menu:close(event)
   local nvim_buf_clear_namespace = vim.api.nvim_buf_clear_namespace
   local nvim_buf_delete = vim.api.nvim_buf_delete
 
-  nvim_buf_clear_namespace(self.window.bufnr, self.nsid, 0, -1)
-  nvim_buf_delete(self.window.bufnr, { force = true })
+  nvim_buf_clear_namespace(self.canvas.bufnr, self.canvas.nsid, 0, -1)
+  nvim_buf_delete(self.canvas.bufnr, { force = true })
 
-  ContextManager.remove(self.window.winid)
+  ContextManager.remove(self.canvas.winid)
   vim.api.nvim_command 'hi! Cursor blend=0'
 end
 
@@ -365,11 +368,11 @@ end
 
 --TODO: this is for ui.select!
 -- function Menu.actions:toggle_selection(context, direction)
---   local active = context.displayed_items[context.active_list_idx]
+--   local active = context.canvased_items[context.active_list_idx]
 --   if not active.is_loaded and (direction == 1 or (direction == -1 and active.is_selected == true)) then
---     context.displayed_items[context.active_list_idx].is_selected = not active.is_selected
+--     context.canvased_items[context.active_list_idx].is_selected = not active.is_selected
 --   end
---   Menu.actions:change_selection(context.window.winid, direction)
+--   Menu.actions:change_selection(context.canvas.winid, direction)
 -- end
 
 function Menu.actions:accept_selection()

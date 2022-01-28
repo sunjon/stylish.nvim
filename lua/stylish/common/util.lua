@@ -18,10 +18,15 @@ function Util.lerp(v0, v1, t)
   return v0 * (1 - t) + v1 * t
 end
 
+-- TODO: this was the lerp used to create the color gradients in kraft notifications
+local function lerp2(a, b, interp)
+  return a + (b - a) * interp
+end
+
 function Util.extmark_create_batch(bufnr, nsid, n)
   local extmark_ids = {}
   for i = 1, n do
-    extmark_ids[i] = api.nvim_buf_set_extmark(bufnr, nsid, i, 0, {virt_text_pos="overlay"})
+    extmark_ids[i] = api.nvim_buf_set_extmark(bufnr, nsid, i, 0, { virt_text_pos = 'overlay' })
   end
 
   return extmark_ids
