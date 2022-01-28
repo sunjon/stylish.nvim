@@ -14,13 +14,13 @@ This project is alpha/WIP. Feel free to open issues to contribute ideas.
 
 <img src="https://github.com/sunjon/images/blob/master/stylish_ui_clock.gif" alt="screenshot" width="800"/>
 
-### vim.ui.menu
-
-<img src="https://github.com/sunjon/images/blob/master/stylish_ui_menu.gif" alt="screenshot" width="800"/>
-
 ### vim.ui.graph (soon™)
 
 <img src="https://raw.githubusercontent.com/sunjon/images/master/stylish_ui_graph.png" alt="screenshot" width="800"/>
+
+### vim.ui.menu
+
+<img src="https://github.com/sunjon/images/blob/master/stylish_ui_menu.gif" alt="screenshot" width="800"/>
 
 ### vim.ui.notify
 
