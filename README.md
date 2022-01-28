@@ -6,15 +6,19 @@ Components are rendered using ASCII characters in the terminal. A font that supp
 
 This project is alpha/WIP. Feel free to open issues to contribute ideas.
 
+### vim.ui.splashlogo (soon™)
+
+<img src="https://raw.githubusercontent.com/sunjon/images/master/stylish_ui_splashlogo.png" alt="screenshot" width="800"/>
+
+### vim.ui.clock
+
+<img src="https://github.com/sunjon/images/blob/master/stylish_ui_clock.gif" alt="screenshot" width="800"/>
+
 ### vim.ui.menu
 
 <img src="https://github.com/sunjon/images/blob/master/stylish_ui_menu.gif" alt="screenshot" width="800"/>
 
-### vim.ui.clock ?!?
-
-<img src="https://github.com/sunjon/images/blob/master/stylish_ui_clock.gif" alt="screenshot" width="800"/>
-
-### vim.ui.graph
+### vim.ui.graph (soon™)
 
 <img src="https://raw.githubusercontent.com/sunjon/images/master/stylish_ui_graph.png" alt="screenshot" width="800"/>
 
