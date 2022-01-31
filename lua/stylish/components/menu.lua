@@ -8,6 +8,7 @@ local MouseHandler = require 'stylish.common.mouse_hover_handler'
 local Util = require 'stylish.common.util'
 
 --
+local XDOTOOL = Util.file_exists('/usr/bin/xdotool')
 
 local function get_raw_menu(tbl, stack)
   local stack_idx
@@ -77,10 +78,7 @@ function Menu:new(menu_data, opts, on_choice)
   this.default_prompt = opts.prompt
   this.title = opts.prompt
   this.kind = opts.kind or 'default'
-  if opts.experimental_mouse then
-    -- check if xdotool is available
-    this.experimental_mouse = opts.experimental_mouse
-  end
+  this.experimental_mouse = (XDOTOOL and opts.experimental_mouse)
 
   -- TODO: validate menu_data
   this._menu_data = menu_data

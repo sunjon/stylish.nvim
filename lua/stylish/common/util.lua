@@ -44,4 +44,14 @@ function Util.is_in_rectangle(x1, y1, x2, y2, x, y)
   end
 end
 
+function Util.file_exists(path)
+  local f = io.open(path, 'r')
+  if f ~= nil then
+    io.close(f)
+    return true
+  else
+    return false
+  end
+end
+
 return Util
