@@ -1,6 +1,8 @@
 local function set_autocmds(winid)
   -- TODO: `ModeChanged` doesn't detect Replace/Select modes
-  vim.cmd('au! BufLeave,ModeChanged <buffer> lua require"stylish".event_listener(' .. winid .. ', "FocusLost")')
+  local au_cmd = ('au BufLeave,ModeChanged <buffer> lua require"stylish".event_listener(%d, "FocusLost")'):format(winid)
+  local au_statement = 'augroup StylishCanvas\nau!\n' .. au_cmd .. '\naugroup END'
+  vim.cmd(au_statement)
 end
 
 -- TODO: create Canvas:close()
@@ -77,7 +79,9 @@ function Canvas:new(config)
 
   this.nsid = vim.api.nvim_create_namespace('StylishCanvas_' .. this.winid)
 
-  set_autocmds(this.winid)
+  if this.focusable then
+    set_autocmds(this.winid)
+  end
   -- vim.cmd [[nmapclear <buffer>]]
   return this
 end
