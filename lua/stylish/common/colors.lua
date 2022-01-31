@@ -126,7 +126,6 @@ end
 function Colors.create_gradient_map(prefix, color_name, palette, max_brightness)
   -- get the user set background color
   local bg_val = api.nvim_get_hl_by_name("Normal", true).background or DEFAULT_BG
-  print(vim.inspect(bg_val))
   local user_background = ("#%06x"):format(bg_val)
 
   --
