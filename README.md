@@ -26,7 +26,7 @@ This project is alpha/WIP. Feel free to open issues to contribute ideas.
 
 <img src="https://raw.githubusercontent.com/sunjon/images/master/stylish_ui_keyboard_heatmap.png" alt="screenshot" width="800"/>
 
-### vim.ui.notify
+### vim.ui.notify (soon™)
 
 <img src="https://github.com/sunjon/images/blob/master/stylish_ui_notifications.gif" alt="screenshot" width="800"/>
 
@@ -51,8 +51,6 @@ Plug 'sunjon/stylish.nvim'
 
 ```lua
 vim.ui.menu = require('stylish').ui_menu()
--- vim.ui.select = require('stylish').ui_select()
--- vim.ui.notify = require('stylish').ui_notification()
 ```
 
 ### Testing `vim.ui.menu`
