@@ -20,7 +20,7 @@ This project is alpha/WIP. Feel free to open issues to contribute ideas.
 
 ### vim.ui.menu
 
-<img src="https://github.com/sunjon/images/blob/master/stylish_ui_menu.gif" alt="screenshot" width="800"/>
+<img src="https://raw.githubusercontent.com/sunjon/images/master/stylish_ui_mousemenu.gif" alt="screenshot" width="800"/>
 
 ### vim.ui.notify
 
