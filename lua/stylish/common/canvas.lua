@@ -27,9 +27,18 @@ function Canvas:new(config)
 
   this.width = config.win_opts.width
   this.height = config.win_opts.height
-  this.pos = {
-    row = config.win_opts.row,
-    col = config.win_opts.col,
+
+  -- if screenposition not explicitly set, position at top left of current window
+  local screenrow = config.win_opts.row
+  local screencol = config.win_opts.col
+  if (not screenrow or screenrow == -1) or (not screencol or screencol == -1) then
+    local wininfo = vim.fn.win_screenpos(0)
+    screenrow, screencol = wininfo[1], wininfo[2]
+  end
+
+  this.screenpos = {
+    row = screenrow,
+    col = screencol
   }
   this.focusable = config.win_opts.focusable
   -- this.padding = padding
@@ -37,8 +46,8 @@ function Canvas:new(config)
   local win_opts = {
     width = this.width,
     height = this.height,
-    row = this.pos.row,
-    col = this.pos.col,
+    row = this.screenpos.row,
+    col = this.screenpos.col,
     relative = config.win_opts.relative or 'editor',
     style = 'minimal',
     focusable = this.focusable or false,

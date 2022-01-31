@@ -75,11 +75,14 @@ function Menu:new(menu_data, opts, on_choice)
   vim.cmd [[hi Cursor blend=100]]
 
   opts = opts or {}
+
   this.default_prompt = opts.prompt
   this.title = opts.prompt
   this.kind = opts.kind or 'default'
   this.experimental_mouse = (XDOTOOL and opts.experimental_mouse)
 
+  local screenrow = opts.position and opts.position.screenrow
+  local screencol = opts.position and opts.position.screencol
   -- TODO: validate menu_data
   this._menu_data = menu_data
 
@@ -87,10 +90,11 @@ function Menu:new(menu_data, opts, on_choice)
     win_opts = {
       height = 1,
       width = 1,
-      row = 1,
-      col = 1,
-      relative = not opts.pos and 'cursor',
-      bufpos = not opts.pos and { 0, 0 },
+      row = screenrow or -1,
+      col = screencol or -1,
+      -- relative = (opts.position) and 'editor' or 'cursor',
+      relative = 'editor',
+      bufpos = (not opts.position) and { 0, 0 },
       focusable = true,
     },
     focus_window = true,
@@ -520,25 +524,30 @@ function Menu.actions:mouse_drag()
   local click_pos = getmousepos()
 
   if self.is_dragging then
+    -- print(vim.inspect(self.drag_anchor_pos))
     local row_offset = click_pos.screenrow - self.drag_anchor_pos.row
     local col_offset = click_pos.screencol - self.drag_anchor_pos.col
+    -- print(row_offset, col_offset)
+    -- print('canvas.screenpos')
+    -- print(vim.inspect(self.canvas.screenpos))
     local new_wincfg = {
       relative = 'editor',
-      row = self.canvas.pos.row + row_offset,
-      col = self.canvas.pos.col + col_offset,
+      row = self.canvas.screenpos.row + row_offset,
+      col = self.canvas.screenpos.col + col_offset,
     }
-    self.canvas.pos.row = new_wincfg.row
-    self.canvas.pos.col = new_wincfg.col
+    -- print(vim.inspect(new_wincfg))
+    win_set_config(self.canvas.winid, new_wincfg)
+    self.canvas.screenpos.row = new_wincfg.row
+    self.canvas.screenpos.col = new_wincfg.col
     self.drag_anchor_pos.row = click_pos.screenrow
     self.drag_anchor_pos.col = click_pos.screencol
-    win_set_config(self.canvas.winid, new_wincfg)
   end
 end
 
 function Menu.actions:mouse_release()
   if self.is_dragging then
     self.is_dragging = false
-    self.drag_anchor_pos = nil
+    self.drag_anchor_pos = {}
   end
 end
 
