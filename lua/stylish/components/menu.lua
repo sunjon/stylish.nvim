@@ -392,15 +392,16 @@ end
 Menu.actions = {}
 
 -- TODO: this should be usable by ui.select!
-function Menu.actions:change_selection(direction)
-  local loop_selection = self.config.loop_selection
+function Menu.actions:change_selection(direction, context)
+  context = self.stack and self or context
+  local loop_selection = context.config.loop_selection
 
-  if self.viewport.items_visible <= 1 then
+  if context.viewport.items_visible <= 1 then
     return
   end
 
   -- TODO: this is still a mess
-  local active_menu = self.stack[#self.stack]
+  local active_menu = context.stack[#context.stack]
   local viewport = active_menu.viewport
 
   local new_selection_idx = viewport.selected_idx + direction
@@ -434,7 +435,7 @@ function Menu.actions:change_selection(direction)
   viewport.items_above = new_top_visible_idx - 1
   viewport.items_below = total_items - (new_top_visible_idx + viewport.items_visible - 1)
 
-  self:_redraw_display()
+  context:_redraw_display()
 end
 
 --TODO: this is for ui.select!
@@ -542,11 +543,11 @@ function Menu.actions:mouse_release()
 end
 
 function Menu.actions:mouse_scroll_up()
-  print 'scroll up'
+  self.actions:change_selection(-1, self)
 end
 
 function Menu.actions:mouse_scroll_down()
-  print 'scroll down'
+  self.actions:change_selection(1, self)
 end
 
 function Menu.actions:nop()
