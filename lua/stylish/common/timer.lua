@@ -1,21 +1,79 @@
-local Clock = {}
+local costate = {
+  RUNNING = 'running',
+  SUSPENDED = 'suspended',
+  DEAD = 'dead',
+}
 
-function Clock.get_time()
-  local uv = vim.loop
-  return uv.now() / 1000
+-- local scene = require('scenes/nyan').scene
+
+
+local time_now
+local DEFAULT_UPDATE_INTERVAL = 1000/60
+
+local Timer = {}
+Timer.__index = Timer
+
+-- Scene = coroutine
+function Timer:new(scene, context, update_interval)
+  local this = {}
+  setmetatable(this, self)
+  self.__index = self
+
+  -- TODO: check scene is a valid coroutine
+  this.scene = scene
+  this.context = context
+  this.update_interval = update_interval or DEFAULT_UPDATE_INTERVAL
+  this.timer = vim.loop.new_timer()
+  this.frame_count = 0
+
+  return this
 end
 
--- TODO: this should be a method of animation_timer
-function Clock.update_delta_time(animation_timer)
-  local get_time = Clock.get_time
-
-  local time_now = get_time()
-  local delta_time = time_now - animation_timer.last_frame
-  --
-  animation_timer.last_frame = time_now
-  animation_timer.elapsed = animation_timer.elapsed + delta_time
-
-  return animation_timer
+function Timer:start()
+  local context = self.context
+  self.timer:start(0, self.update_interval, function()
+    local scene = self.scene
+    if coroutine.status(scene) == costate.SUSPENDED then
+      local success, frame_lines = coroutine.resume(scene, context)
+      if not success then
+        -- TODO: error and teardown/cleanup
+        print(frame_lines)
+        print '!!!'
+      end
+      self.frame_count = self.frame_count + 1
+    end
+    -- time_last_frame = time_now
+  end)
 end
 
-return Clock
+function Timer:stop()
+  if self.timer then
+    self.timer:stop()
+    self.timer = nil
+  end
+end
+
+return Timer
+
+
+    -- print(self.renderer.frame_count)
+    -- if not frame_lines then
+    --   frame_lines = cached
+    -- else
+    --   cached = frame_lines
+    -- end
+
+    -- local frame_lines = {}
+    -- print(self.renderer.frame_count)
+
+    -- print(vim.inspect(frame_lines))
+    -- return frame
+    -- print(self.renderer.frame_count)
+    -- render_time = get_time() - time_now
+    -- print(render_time)
+    -- else
+    --   current_scene:stop()
+    --   current_scene:close()
+    --   current_scene= nil
+    -- else
+    -- print(coroutine.status(current_scene))
