@@ -1,10 +1,11 @@
 local api = vim.api
 
 local ContextManager = require 'stylish.common.context'
-local KeyMap = require 'stylish.common.keymap'
+local KeyHandler = require 'stylish.common.key_handler'
 local Styles = require 'stylish.common.styles'
 local Canvas = require 'stylish.common.canvas'
--- local Util = require 'stylish.common.util'
+local MouseHandler = require 'stylish.common.mouse_hover_handler'
+local Util = require 'stylish.common.util'
 
 --
 
@@ -40,11 +41,18 @@ local function init_viewport(menu_items, max_visible_items)
   }
 end
 
+local function get_viewport_row(row, num_items)
+  local floor = math.floor
+  -- print(row .. ':' ..col)
+  local start_row = 4
+  local idx = floor((row + 2 - start_row) / 2)
+  return (idx > 0 and idx <= num_items) and idx or nil
+end
+
 local Menu = {}
 
--- TODO: maybe don't need the metatable?
 Menu.__index = Menu
-Menu.key_handler = KeyMap.key_handler
+Menu.key_handler = KeyHandler.key_handler
 
 function Menu:new(menu_data, opts, on_choice)
   local this = {}
@@ -53,6 +61,8 @@ function Menu:new(menu_data, opts, on_choice)
 
   -- TODO: decide on window management strategy
   local current_winid = vim.api.nvim_get_current_win()
+  local current_bufnr = vim.api.nvim_get_current_buf()
+
   if ContextManager.get(current_winid) then
     return
   end
@@ -66,8 +76,12 @@ function Menu:new(menu_data, opts, on_choice)
   opts = opts or {}
   this.default_prompt = opts.prompt
   this.title = opts.prompt
-
   this.kind = opts.kind or 'default'
+  if opts.experimental_mouse then
+    -- check if xdotool is available
+    this.experimental_mouse = opts.experimental_mouse
+  end
+
   -- TODO: validate menu_data
   this._menu_data = menu_data
 
@@ -78,10 +92,11 @@ function Menu:new(menu_data, opts, on_choice)
       row = 1,
       col = 1,
       relative = not opts.pos and 'cursor',
-      bufpos = not opts.pos and {0, 0},
-    } ,
+      bufpos = not opts.pos and { 0, 0 },
+      focusable = true,
+    },
     focus_window = true,
-    win_settings ={ { 'winhighlight', 'Normal:PopupNormal' } },
+    win_settings = { { 'winhighlight', 'Normal:PopupNormal' } },
   }
 
   this.canvas = Canvas:new(canvas_config)
@@ -98,8 +113,58 @@ function Menu:new(menu_data, opts, on_choice)
   --
   this:update()
 
+  -- print(vim.inspect(ContextManager.config.keymap))
   -- TODO: Config table needs to be avail here
-  KeyMap.set_keymaps(this.canvas.winid, this.canvas.bufnr)
+  local key_config = ContextManager.config.keymap
+  KeyHandler.set_keymap(this.canvas.winid, this.canvas.bufnr, key_config)
+
+  local function mouse_hover_callback(row, col)
+    local vp = this.stack[#this.stack].viewport
+    local total_items = vp.items_visible
+    local viewport_idx = get_viewport_row(row, total_items)
+
+    local back_button = { start_col = 2, end_col = 3 } -- TODO:set from style
+    local back_button_hover_state = ((col >= back_button.start_col) and (col <= back_button.end_col))
+    -- TODO: don't update if viewport state didn't change
+
+    if (viewport_idx ~= vp.select_idx) or (back_button_hover_state ~= vp.back_button_hover_state) then
+      if viewport_idx then
+        local idx = vp.top_visible_idx + viewport_idx - 1
+        vp.selected_idx = idx
+      end
+      vp.back_button_hover_state = back_button_hover_state
+      this:update()
+    end
+  end
+
+  -- make sure the mouse pointer is within the neovim window,
+  -- otherwise chaos when mousedown hack is enabled
+
+    local mouse_config = ContextManager.config.mousemap
+    KeyHandler.set_keymap(this.canvas.winid, this.canvas.bufnr, mouse_config)
+  if this.experimental_mouse then
+    local nvim_x11_winid = os.getenv 'WINDOWID'
+    local win_info = vim.fn.system('xwininfo -id ' .. nvim_x11_winid)
+
+    local dims = {
+      x = tonumber(win_info:match 'Absolute upper%-left X:%s*(%d+)'),
+      y = tonumber(win_info:match 'Absolute upper%-left Y:%s*(%d+)'),
+      width = tonumber(win_info:match 'Width:%s+(%d+)'),
+      height = tonumber(win_info:match 'Height:%s+(%d+)'),
+    }
+
+    local mouse_pos = vim.fn.system 'xdotool getmouselocation'
+    local mouse_x, mouse_y
+    mouse_x = tonumber(mouse_pos:match 'x:(%d+)')
+    mouse_y = tonumber(mouse_pos:match 'y:(%d+)')
+    if not Util.is_in_rectangle(dims.x, dims.y, dims.x + dims.width, dims.y + dims.height, mouse_x, mouse_y) then
+      local reset_mouse = ('xdotool mousemove --window 0x%x 0 0'):format(nvim_x11_winid)
+      os.execute(reset_mouse)
+    end
+
+    this.mouse_hover_handler = MouseHandler:new(this.canvas.winid, mouse_hover_callback)
+    this.mouse_hover_handler:start()
+  end
 
   -- store the popup details in the registry
   ContextManager.add(this)
@@ -133,7 +198,8 @@ function Menu:set_styled_labels()
   if active_menu.title then
     local chunks
     local back_marker = #self.stack > 1 and back_indicator or (' '):rep(vim.api.nvim_strwidth(back_indicator))
-    chunks = { { back_marker, 'MenuBackIndicator' } }
+    local back_marker_hl = viewport.back_button_hover_state and 'MenuBackIndicatorActive' or 'MenuBackIndicatorInactive'
+    chunks = { { back_marker, back_marker_hl } }
     set_extmark(1, 1, chunks)
 
     --
@@ -300,12 +366,19 @@ function Menu:_redraw_display()
 end
 
 function Menu:update()
+  -- TODO: reset mouse_hover_handler
+
   self:_resize_window()
   self:_redraw_display()
 end
 --
 
 function Menu:close(event)
+  -- TODO: which objects need setting to nil for GC?
+  if self.mouse_hover_handler then
+    self.mouse_hover_handler:stop()
+  end
+
   local nvim_buf_clear_namespace = vim.api.nvim_buf_clear_namespace
   local nvim_buf_delete = vim.api.nvim_buf_delete
 
@@ -375,40 +448,111 @@ end
 --   Menu.actions:change_selection(context.canvas.winid, direction)
 -- end
 
-function Menu.actions:accept_selection()
-  local raw_menu = get_raw_menu(self._menu_data, self.stack)
-  local viewport = self.stack[#self.stack].viewport
+function Menu.actions:accept_selection(context)
+  context = self.stack and self or context
+
+  local raw_menu = get_raw_menu(context._menu_data, context.stack)
+  local viewport = context.stack[#context.stack].viewport
   local selected_item = raw_menu[viewport.selected_idx]
   -- print(vim.inspect(selected_item))
   if selected_item.submenus then
     -- TODO: create add_stack method
     local submenu_items = get_menu_items(selected_item.submenus)
-    self.stack[#self.stack + 1] = {
+    context.stack[#context.stack + 1] = {
       title = selected_item.name,
       items = submenu_items,
-      viewport = init_viewport(submenu_items, self.config.max_visible_items),
+      viewport = init_viewport(submenu_items, context.config.max_visible_items),
     }
-    self:update()
+    context:update()
   else
     local nvim_get_mode = vim.api.nvim_get_mode
     local mode = nvim_get_mode().mode
     local rhs = selected_item.mappings[mode].rhs
-    self:close 'menu_accept'
+    context:close 'menu_accept'
     print(rhs)
     -- return via callback
-    self.on_choice(rhs)
+    context.on_choice(rhs)
   end
 end
 
-function Menu.actions:back()
-  if #self.stack > 1 then
-    table.remove(self.stack, #self.stack)
-    self:update()
+function Menu.actions:back(context)
+  context = self.stack and self or context
+  if #context.stack > 1 then
+    table.remove(context.stack, #context.stack)
+    context:update()
   end
 end
 
 function Menu.actions:close_window()
   self:close 'keypress'
+end
+
+-- TODO: do this in key/mouse handler
+function Menu.actions:mouse_select()
+  local title_column = 2 -- TODO: set from style
+  local back_button = { start_col = 2, end_col = 3 } -- set from style
+  local mouse_click = vim.fn.getmousepos()
+  if mouse_click.winid == self.canvas.winid then
+    local context = self.stack[#self.stack]
+    local item_idx = get_viewport_row(mouse_click.winrow, #context.items)
+
+    -- TODO: clean up this logic
+    if self.experimental_mouse and item_idx then
+      Menu.actions:accept_selection(self) -- FIX: Argh!.. this sending the context nonsense
+    elseif
+      self.experimental_mouse and
+      mouse_click.winrow == title_column
+      and (mouse_click.wincol >= back_button.start_col)
+      and (mouse_click.wincol <= back_button.end_col)
+    then
+      self.actions:back(self)
+    else
+      self.is_dragging = true --
+      self.drag_anchor_pos = { row = mouse_click.screenrow, col = mouse_click.screencol }
+    end
+  else
+    self:close()
+  end
+end
+
+function Menu.actions:mouse_drag()
+  local win_set_config = vim.api.nvim_win_set_config
+  local getmousepos = vim.fn.getmousepos
+  local click_pos = getmousepos()
+
+  if self.is_dragging then
+    local row_offset = click_pos.screenrow - self.drag_anchor_pos.row
+    local col_offset = click_pos.screencol - self.drag_anchor_pos.col
+    local new_wincfg = {
+      relative = 'editor',
+      row = self.canvas.pos.row + row_offset,
+      col = self.canvas.pos.col + col_offset,
+    }
+    self.canvas.pos.row = new_wincfg.row
+    self.canvas.pos.col = new_wincfg.col
+    self.drag_anchor_pos.row = click_pos.screenrow
+    self.drag_anchor_pos.col = click_pos.screencol
+    win_set_config(self.canvas.winid, new_wincfg)
+  end
+end
+
+function Menu.actions:mouse_release()
+  if self.is_dragging then
+    self.is_dragging = false
+    self.drag_anchor_pos = nil
+  end
+end
+
+function Menu.actions:mouse_scroll_up()
+  print 'scroll up'
+end
+
+function Menu.actions:mouse_scroll_down()
+  print 'scroll down'
+end
+
+function Menu.actions:nop()
+  --
 end
 
 return Menu

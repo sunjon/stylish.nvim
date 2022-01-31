@@ -31,7 +31,8 @@ function Canvas:new(config)
     row = config.win_opts.row,
     col = config.win_opts.col,
   }
-  this.padding = padding
+  this.focusable = config.win_opts.focusable
+  -- this.padding = padding
 
   local win_opts = {
     width = this.width,
@@ -40,7 +41,7 @@ function Canvas:new(config)
     col = this.pos.col,
     relative = config.win_opts.relative or 'editor',
     style = 'minimal',
-    focusable = false,
+    focusable = this.focusable or false,
     border = config.win_opts.border or 'shadow',
 
   }
@@ -59,6 +60,7 @@ function Canvas:new(config)
 
   local win_settings = vim.tbl_extend('force', default_win_settings, config.win_settings)
 
+  -- print(vim.inspect(win_settings))
   for _, option in pairs(win_settings) do
     local key, val = option[1], option[2]
     nvim_win_set_option(this.winid, key, val)

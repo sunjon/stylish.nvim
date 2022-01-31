@@ -1,6 +1,5 @@
 local api = vim.api
 local Util = {}
-
 function Util.table_join(a, b)
   for i = 1, #b do
     a[#a + 1] = b[i]
@@ -37,6 +36,12 @@ function Util.get_time()
   return uv.now() / 1000
 end
 
-
+function Util.is_in_rectangle(x1, y1, x2, y2, x, y)
+  if x > x1 and x < x2 and y > y1 and y < y2 then
+    return true
+  else
+    return false
+  end
+end
 
 return Util

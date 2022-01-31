@@ -1,4 +1,4 @@
-local Animator = require 'stylish.common.animator'
+local Timer = require 'stylish.common.timer'
 local Colors = require 'stylish.common.colors'
 local Data = require 'stylish.common.data_rle'
 local Canvas = require 'stylish.common.canvas'
@@ -303,22 +303,44 @@ function Clock:new(user_config)
     or Colors.create_gradient_map('WidgetClock', 'text', { color_hex_str }, ANIMATION_BRIGHTNESS_STEPS).fg[1]
   Clock.font_data = Clock.font_data or load_font()
 
+  local padding = 2
+  local statusline = 2
   -- TODO: allow for preset clock positions
   local parent_win_width = vim.o.columns
+  local parent_win_height = vim.o.lines
+
+
+  local editor_top = 1 -- TODO: change if tabline visible
+  local editor_bot = parent_win_height - FLOATWIN_HEIGHT - padding - statusline - 1 -- TODO: change if statusline visible
+  local editor_left = 0
+  local editor_right = parent_win_width - FLOATWIN_WIDTH - 2
+
   local clock_positions = {
-    top_right = {
-      row = 2,
-      col = parent_win_width - FLOATWIN_WIDTH - 2,
+    top_left = {
+      row = editor_top,
+      col = editor_left,
     },
+    top_right = {
+      row = editor_top,
+      col = editor_right,
+    },
+    bot_right = {
+      row = editor_bot,
+      col = editor_right,
+    },
+    bot_left = {
+      row = editor_bot,
+      col = editor_left
+    }
   }
 
   local position = clock_positions.top_right
   local canvas_config = {
     win_opts = {
-      height = FLOATWIN_HEIGHT,
-      width = FLOATWIN_WIDTH,
       row = position.row,
       col = position.col,
+      height = FLOATWIN_HEIGHT,
+      width = FLOATWIN_WIDTH,
       border = BORDER_CHARS,
     },
     focus_window = false,
@@ -352,7 +374,7 @@ end
 
 function Clock:start()
   local update_interval = 1000
-  self.animator = Animator:new(self.scene, self, update_interval)
+  self.animator = Timer:new(self.scene, self, update_interval)
   self.animator:start()
 end
 
@@ -360,10 +382,7 @@ function Clock:stop()
   self.animator:stop()
   -- print(vim.inspect(self.canvas))
   self.canvas:close()
-  --   self.state.canvas:close()
-  --   -- api.nvim_win_close(self.state.canvas.winid, true)
-  --   self.state.canvas = nil
-  -- end
+  self.canvas = nil -- TODO: what needs cleaning up?
 end
 
 return Clock

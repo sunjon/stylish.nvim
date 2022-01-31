@@ -2,11 +2,11 @@ local ContextManager = require 'stylish.common.context'
 
 local M = {}
 
-function M.set_keymaps(winid, bufnr)
+function M.set_keymap(winid, bufnr, key_config)
   local cmd, escaped_key
   local map_opts = { noremap = true, nowait = true, silent = true }
 
-  local key_config = ContextManager.config.keymaps -- Argh! stop passing this around
+  -- print(vim.inspect(key_config))
   for key, _ in pairs(key_config) do
     escaped_key = key:gsub('<', '<lt>')
     cmd = ([[<cmd>lua require('stylish.components.menu').key_handler(%d, '%s')<CR>]]):format(winid, escaped_key)
@@ -15,9 +15,12 @@ function M.set_keymaps(winid, bufnr)
 end
 
 function M.key_handler(winid, key)
-  local key_config = ContextManager.config.keymaps -- Argh! stop passing this around
+  -- print('yo' .. key)
+  local key_config = ContextManager.config.keymap -- Argh! stop passing this around
+  local mouse_config = ContextManager.config.mousemap -- Argh! stop passing this around
   -- print(vim.inspect(key_config))
-  local key_action = key_config[key] -- TODO: default_config should have been translated to current_config (merged/overriden with user config)
+  -- TODO: default_config should have been translated to current_config (merged/overriden with user config)
+  local key_action = key_config[key] or mouse_config[key]
   if not key_action then
     print('invalid key: ' .. key)
     return ''

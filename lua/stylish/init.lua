@@ -36,8 +36,9 @@ function Stylish.setup(opts)
   end
   -- local merged = Config.merge(opts)
   -- print("## MERGED ##")
-  -- print(vim.inspect(merged))
+  -- print(vim.inspect(merged_config))
   ContextManager.config = merged_config
+  -- print(vim.inspect(merged_config))
 end
 
 local function ensure_configured()
