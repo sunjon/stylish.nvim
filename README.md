@@ -73,13 +73,21 @@ See `:h menu` for more details
 #### Configuration: Menu
 
 ```lua
+local opts = {
+  kind = 'menu',
+  prompt = 'Main menu',
+  experimental_mouse = true
+}
+
 vim.api.nvim_set_keymap(
   'n',
   '<F1>',
-  "<Cmd>lua vim.ui.menu(vim.fn.menu_get(''), {kind='menu', prompt='Main Menu'}, function(res) print('### ' ..res) end)<CR>",
+  "<Cmd>lua vim.ui.menu(vim.fn.menu_get(''), opts, function(res) print('### ' ..res) end)<CR>",
   { noremap = true, silent = true }
 )
 ```
+
+NOTE: `experimental_mouse` currently only works with Linux and `xdotool` installed.
 
 ### Testing `stylish.ui_clock`
 
