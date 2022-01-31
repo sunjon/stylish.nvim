@@ -4,7 +4,7 @@ local ContextManager = require 'stylish.common.context'
 -- TODO: only require components configured by user
 local Menu = require 'stylish.components.menu'
 local Clock = require 'stylish.components.clock'
-local Nyan = require 'stylish.components.nyan'
+-- local Nyan = require 'stylish.components.nyan'
 -- print(vim.inspect(Clock))
 
 
