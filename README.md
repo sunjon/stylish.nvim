@@ -6,27 +6,27 @@ Components are rendered using ASCII characters in the terminal. A font that supp
 
 This project is alpha/WIP. Feel free to open issues to contribute ideas.
 
-### vim.ui.splashlogo (soon™)
+### stylish.ui.splashlogo (soon™)
 
 <img src="https://raw.githubusercontent.com/sunjon/images/master/stylish_ui_splashlogo.png" alt="screenshot" width="800"/>
 
-### vim.ui.clock
+### stylish.ui.clock
 
 <img src="https://raw.githubusercontent.com/sunjon/images/master/stylish_ui_clock.gif" alt="screenshot" width="800"/>
 
-### vim.ui.menu
+### stylish.ui.menu
 
 <img src="https://raw.githubusercontent.com/sunjon/images/master/stylish_ui_mousemenu.gif" alt="screenshot" width="800"/>
 
-### vim.ui.graph (soon™)
+### stylish.ui.graph (soon™)
 
 <img src="https://raw.githubusercontent.com/sunjon/images/master/stylish_ui_graph.png" alt="screenshot" width="800"/>
 
-### vim.ui.keyboard_stats (soon™)
+### stylish.ui.keyboard_stats (soon™)
 
 <img src="https://raw.githubusercontent.com/sunjon/images/master/stylish_ui_keyboard_heatmap.png" alt="screenshot" width="800"/>
 
-### vim.ui.notify (soon™)
+### stylish.ui.notify (soon™)
 
 <img src="https://github.com/sunjon/images/blob/master/stylish_ui_notifications.gif" alt="screenshot" width="800"/>
 
@@ -47,13 +47,7 @@ Plug 'sunjon/stylish.nvim'
 
 ## Configuration
 
-### Set Stylish as the vim.ui.* handler:
-
-```lua
-vim.ui.menu = require('stylish').ui_menu()
-```
-
-### Testing `vim.ui.menu`
+### Testing `stylish.ui_menu`
 
 #### Creating Menus:
 
@@ -75,7 +69,7 @@ See `:h menu` for more details
 #### Configuration: Menu
 
 ```lua
-local opts = {
+local menu_opts = {
   kind = 'menu',
   prompt = 'Main menu',
   experimental_mouse = true
@@ -84,12 +78,12 @@ local opts = {
 vim.api.nvim_set_keymap(
   'n',
   '<F1>',
-  "<Cmd>lua vim.ui.menu(vim.fn.menu_get(''), opts, function(res) print('### ' ..res) end)<CR>",
+  "<Cmd>lua require'stylish'.ui_menu(vim.fn.menu_get(''), menu_opts, function(res) print('### ' ..res) end)<CR>",
   { noremap = true, silent = true }
 )
 ```
 
-NOTE: `experimental_mouse` currently only works with Linux and `xdotool` installed.
+NOTE: `experimental_mouse` only works with Linux and `xdotool` installed.
 
 ### Testing `stylish.ui_clock`
 

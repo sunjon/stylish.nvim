@@ -47,7 +47,7 @@ local function ensure_configured()
   end
 end
 
-function Stylish:ui_menu()
+function Stylish.ui_menu(list, opts, cb)
   ensure_configured()
   -- menu specific init
   if ContextManager.size() > 0 then
@@ -58,15 +58,13 @@ function Stylish:ui_menu()
 
   -- Ensure plugin is setup
 
-  return function(list, opts, cb)
-    local new_menu = Menu:new(list, opts, cb)
-    -- TODO: create new_menu:select()
-  end
+  local new_menu = Menu:new(list, opts, cb)
+  -- TODO: create new_menu:select()
 end
 
-function Stylish:ui_select(...)
-  require('stylish.components').select(...)
-end
+-- function Stylish:ui_select(...)
+--   require('stylish.components').select(...)
+-- end
 
 
 local my_clock
@@ -83,9 +81,9 @@ function Stylish:ui_clock()
   -- print(vim.inspect(Clock))
 end
 
-function Stylish:ui_nyan()
-  Nyan:new()
-end
+-- function Stylish:ui_nyan()
+--   Nyan:new()
+-- end
 --
 
 -- function Stylish.window_focusleave(winid)
