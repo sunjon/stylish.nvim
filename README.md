@@ -77,7 +77,7 @@ vim.api.nvim_set_keymap(
 )
 ```
 
-NOTE: `experimental_mouse` only works with Linux and `xdotool` installed.
+NOTE: `experimental_mouse` only works with Linux and `xwininfo` and `xdotool` installed.
 
 ### Testing `stylish.ui_clock`
 
