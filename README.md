@@ -69,16 +69,10 @@ See `:h menu` for more details
 #### Configuration: Menu
 
 ```lua
-local menu_opts = {
-  kind = 'menu',
-  prompt = 'Main menu',
-  experimental_mouse = true
-}
-
 vim.api.nvim_set_keymap(
   'n',
   '<F1>',
-  "<Cmd>lua require'stylish'.ui_menu(vim.fn.menu_get(''), menu_opts, function(res) print('### ' ..res) end)<CR>",
+  "<Cmd>lua require'stylish'.ui_menu(vim.fn.menu_get(''), {kind=menu, prompt = 'Main Menu', experimental_mouse = true}, function(res) print('### ' ..res) end)<CR>",
   { noremap = true, silent = true }
 )
 ```
